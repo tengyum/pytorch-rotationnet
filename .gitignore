@@ -1,0 +1,5 @@
+# pycharm
+.idea/
+
+# compile
+__pycache__
