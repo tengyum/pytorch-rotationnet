@@ -290,24 +290,21 @@ def run_rxp(args, exp_settings, Data_Hyper, run_times):
             args.pretrained = pre
             data_hyper = Data_Hyper(cam)
 
-            train_loader, test_loader = pickle_train_test_loader(*data_hyper.get_hyper_train(),
-                                                                 *data_hyper.get_hyper_test())
-        
-            train_dataset, test_dataset = train_loader.dataset, test_loader.dataset
-        
             best_prec1 = 0
             args.nview = data_hyper.view_num
-            # No rotation case as stated in the RotationNet paper
+            # no rotation case as stated in the RotationNet paper
             args.vcand = np.array([np.roll(range(args.nview), -i) for i in range(args.nview)])
-        
+
+            # make the batch size is a multiplication of nview so every minibatch will have all views of an object
+            args.batch_size = 512 // args.nview * args.nview
             if args.batch_size % args.nview != 0:
                 print('Error: batch size should be multiplication of the number of views,', args.nview)
                 exit()
-        
+
             # Get number of classes from train directory
             num_classes = len(glob.glob(args.data + '/*'))
             print("num_classes = '{}'".format(num_classes))
-        
+
             # create model
             if args.pretrained:
                 print("=> using pre-trained model '{}'".format(args.arch))
@@ -315,7 +312,13 @@ def run_rxp(args, exp_settings, Data_Hyper, run_times):
             else:
                 print("=> creating model '{}'".format(args.arch))
                 model = models.__dict__[args.arch]()
-        
+
+            train_loader, test_loader = pickle_train_test_loader(*data_hyper.get_hyper_train(args.batch_size),
+                                                                 *data_hyper.get_hyper_test(args.batch_size))
+
+            train_dataset, test_dataset = train_loader.dataset, test_loader.dataset
+
+            # load model
             model = FineTuneModel(model, args.arch, (num_classes + 1) * args.nview)
         
             if args.arch.startswith('alexnet') or args.arch.startswith('vgg'):
@@ -378,7 +381,7 @@ def run_rxp(args, exp_settings, Data_Hyper, run_times):
                     'optimizer': optimizer.state_dict(),
                 }, is_best, fname, fname2)
         
-            rst_dir = './rst/cvpr/rotationnet_c%d.csv' % data_hyper.c
+            rst_dir = './rst/cvpr/rotationnet_c%d_2.csv' % data_hyper.c
             with open(rst_dir, 'a+') as f:
                 line = '%s\t%s\t%s\t%f\n' % (cam,
                                              'rotationnet_resnet18',
@@ -390,7 +393,6 @@ def run_rxp(args, exp_settings, Data_Hyper, run_times):
 def main():
     args = Namespace(
         arch='resnet18',
-        batch_size=400,
         data='/media/tengyu/DataU/Data/ModelNet/ModelNet40',
         dist_backend='gloo',
         dist_url='tcp://224.66.41.62:23456',
@@ -414,12 +416,14 @@ def main():
                     # '60_15_5_5_0.01', '100_25_3_3_0.01', '300_75_1_1_0.01']
 
     # c40000
-    cam_settings = ['4_1_100_100_0.01', '8_2_50_50_0.01', '16_4_25_25_0.01', '20_5_20_20_0.01']
+    # cam_settings = ['4_1_100_100_0.01', '8_2_50_50_0.01', '16_4_25_25_0.01', '20_5_20_20_0.01']
                     # '40_10_10_10_0.01', '80_20_5_5_0.01', '100_25_4_4_0.01', '200_50_2_2_0.01', '400_100_1_1_0.01']
+
+    cam_settings = ['4_1_50_50_0.02', '8_2_25_25_0.02', '4_1_75_75_0.01', '12_3_25_25_0.01', '4_1_100_100_0.01', '8_2_50_50_0.01']
     pretraineds = [True, False]
     exp_settings = list(itertools.product(*[cam_settings, pretraineds]))
     Data_Hyper = ModelNet40_Hyper
-    run_times = 5
+    run_times = 1
 
     run_rxp(args, exp_settings, Data_Hyper, run_times)
     

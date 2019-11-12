@@ -31,7 +31,7 @@ class ModelNet40_Hyper:
                          'toilet', 'tv_stand', 'vase', 'wardrobe', 'xbox']
         self.single = True
 
-    def get_hyper_train(self):
+    def get_hyper_train(self, batch_size):
         hyper_train_data = {
             'data_glob': self.train_glob,
             'all_cate': self.all_cate,
@@ -40,12 +40,12 @@ class ModelNet40_Hyper:
         }
 
         hyper_train_loader = {
-            'batch_size': 128,
+            'batch_size': batch_size,
             'shuffle': True
         }
         return hyper_train_data, hyper_train_loader
 
-    def get_hyper_test(self):
+    def get_hyper_test(self, batch_size):
         hyper_test_data = {
             'data_glob': self.test_glob,
             'all_cate': self.all_cate,
@@ -54,7 +54,7 @@ class ModelNet40_Hyper:
         }
 
         hyper_test_loader = {
-            'batch_size': 128,
+            'batch_size': batch_size,
             'shuffle': False
         }
         return hyper_test_data, hyper_test_loader
