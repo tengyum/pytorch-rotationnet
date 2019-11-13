@@ -8,6 +8,7 @@ from inlearn.utils import data_utils
 
 class ModelNet40_Hyper:
     def __init__(self, cam):
+        self.name = 'modelnet40'
         self.cam = cam
         self.c = functools.reduce(lambda a, b: int(a) * int(b), self.cam.split('_')[:4])
         self.view_num = functools.reduce(lambda a, b: int(a) * int(b), self.cam.split('_')[:2])
@@ -29,14 +30,15 @@ class ModelNet40_Hyper:
                          'piano', 'plant', 'radio', 'range_hood', 'sink',
                          'sofa', 'stairs', 'stool', 'table', 'tent',
                          'toilet', 'tv_stand', 'vase', 'wardrobe', 'xbox']
-        self.single = True
+        self.load_type = 'single'  # whole, single, channel
 
     def get_hyper_train(self, batch_size):
         hyper_train_data = {
+            'name': self.name,
             'data_glob': self.train_glob,
             'all_cate': self.all_cate,
             'transform': self.transform,
-            'single': self.single
+            'load_type': self.load_type
         }
 
         hyper_train_loader = {
@@ -47,10 +49,11 @@ class ModelNet40_Hyper:
 
     def get_hyper_test(self, batch_size):
         hyper_test_data = {
+            'name': self.name,
             'data_glob': self.test_glob,
             'all_cate': self.all_cate,
             'transform': self.transform,
-            'single': self.single
+            'load_type': self.load_type
         }
 
         hyper_test_loader = {
@@ -78,14 +81,16 @@ class ModelNet40_Hyper:
     def get_hyper_rst(self):
         hyper_rst = {
             'save': False,
-            'rst_dir': './rst/cvpr/mvcnn_modelnet40_c%d.csv' % self.c
+            'rst_dir': './rst/cvpr/rotationnet_modelnet40_c%d.csv' % self.c
         }
         return hyper_rst
 
 
 class SHREC17_Hyper:
     def __init__(self, cam):
+        self.name = 'shrec17'
         self.cam = cam
+        self.view_num = functools.reduce(lambda a, b: int(a) * int(b), self.cam.split('_')[:2])
         self.c = functools.reduce(lambda a, b: int(a) * int(b), self.cam.split('_')[:4])
         if os.path.basename(os.getenv('HOME')) == 'mat':
             data_root = '/home/mat/Data'
@@ -104,32 +109,34 @@ class SHREC17_Hyper:
                          '04468005', '02801938', '02871439', '02942699', '03001627', '03261776', '03593526', '03710193',
                          '03928116', '04074963', '04330267', '04530566', '02808440', '02876657', '02946921', '03046257',
                          '03325088', '03624134', '03759954', '03938244', '04090263', '04379243', '04554684']
-        self.single = True
+        self.load_type = 'single'
 
-    def get_hyper_train(self):
+    def get_hyper_train(self, batch_size):
         hyper_train_data = {
+            'name': self.name,
             'data_glob': self.train_glob,
             'all_cate': self.all_cate,
             'transform': self.transform,
-            'single': self.single
+            'load_type': self.load_type
         }
 
         hyper_train_loader = {
-            'batch_size': 128,
+            'batch_size': batch_size,
             'shuffle': True
         }
         return hyper_train_data, hyper_train_loader
 
-    def get_hyper_test(self):
+    def get_hyper_test(self, batch_size):
         hyper_test_data = {
+            'name': self.name,
             'data_glob': self.test_glob,
             'all_cate': self.all_cate,
             'transform': self.transform,
-            'single': self.single
+            'load_type': self.load_type
         }
 
         hyper_test_loader = {
-            'batch_size': 128,
+            'batch_size': batch_size,
             'shuffle': False
         }
         return hyper_test_data, hyper_test_loader
@@ -153,6 +160,6 @@ class SHREC17_Hyper:
     def get_hyper_rst(self):
         hyper_rst = {
             'save': False,
-            'rst_dir': './rst/cvpr/mvcnn_SHREC17_c%d.csv' % self.c
+            'rst_dir': './rst/cvpr/rotationnet_SHREC17_c%d.csv' % self.c
         }
         return hyper_rst

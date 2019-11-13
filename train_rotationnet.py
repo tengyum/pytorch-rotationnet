@@ -313,8 +313,7 @@ def run_rxp(args, exp_settings, Data_Hyper, run_times):
                 print("=> creating model '{}'".format(args.arch))
                 model = models.__dict__[args.arch]()
 
-            train_loader, test_loader = pickle_train_test_loader(*data_hyper.get_hyper_train(args.batch_size),
-                                                                 *data_hyper.get_hyper_test(args.batch_size))
+            train_loader, test_loader = pickle_train_test_loader(data_hyper, args)
 
             train_dataset, test_dataset = train_loader.dataset, test_loader.dataset
 
@@ -419,8 +418,9 @@ def main():
     # cam_settings = ['4_1_100_100_0.01', '8_2_50_50_0.01', '16_4_25_25_0.01', '20_5_20_20_0.01']
                     # '40_10_10_10_0.01', '80_20_5_5_0.01', '100_25_4_4_0.01', '200_50_2_2_0.01', '400_100_1_1_0.01']
 
-    cam_settings = ['4_1_50_50_0.02', '8_2_25_25_0.02', '4_1_75_75_0.01', '12_3_25_25_0.01', '4_1_100_100_0.01', '8_2_50_50_0.01']
-    pretraineds = [True, False]
+    # cam_settings = ['4_1_50_50_0.02', '8_2_25_25_0.02', '4_1_75_75_0.01', '12_3_25_25_0.01', '4_1_100_100_0.01', '8_2_50_50_0.01']
+    cam_settings = ['12_3_25_25_0.01']
+    pretraineds = [False]
     exp_settings = list(itertools.product(*[cam_settings, pretraineds]))
     Data_Hyper = ModelNet40_Hyper
     run_times = 1

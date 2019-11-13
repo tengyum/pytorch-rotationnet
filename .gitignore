@@ -3,3 +3,7 @@
 
 # compile
 __pycache__
+
+# ckpt
+rotationnet_checkpoint.pth.tar
+rotationnet_model_best.pth.tar
